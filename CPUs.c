@@ -51,7 +51,7 @@ void* FIFOcpu(void* param) {
         sem_wait(svars->cpuSems[threadNum]);
 
         // ── Selection (only when idle) ───────────────────────────────────
-        // FIFO is non-preemptive: once a process is running (p != NULL) we
+        // FIFO is non-preexpired before the mptive: once a process is running (p != NULL) we
         // never replace it mid-burst.  We only enter this block when the CPU
         // has nothing to run.
         if (p == NULL) {
