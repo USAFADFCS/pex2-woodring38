@@ -14,7 +14,8 @@
  *          All accesses to readyQ and finishedQ are protected by their
  *          respective mutex locks.
  * ===========================================================
- * Documentation Statement: None.
+ * Documentation Statement: C2C Gavin Smith told me that when you check the quantum matters. This is because you need to
+ * let any arriving processes enter the queue before moving a process from the cpu back onto the end of queue.
  * =========================================================== */
 
 #include <stdio.h>
