@@ -1,7 +1,7 @@
 /** CPUs.c
  * ===========================================================
- * Name: <Last Name, First Name>
- * Section: <Section>
+ * Name: Woodring, Tanner
+ * Section: M3
  * Project: PEX2 - CPU Scheduling Simulator
  * Purpose: Implements six CPU scheduling algorithms as POSIX threads.
  *          Each thread follows the same pattern every timestep:
@@ -14,7 +14,7 @@
  *          All accesses to readyQ and finishedQ are protected by their
  *          respective mutex locks.
  * ===========================================================
- * Documentation Statement: <describe any help received>
+ * Documentation Statement: None.
  * =========================================================== */
 
 #include <stdio.h>
@@ -107,10 +107,39 @@ void* SJFcpu(void* param) {
     int threadNum = ((CpuParams*) param)->threadNumber;
     SharedVars* svars = ((CpuParams*) param)->svars;
 
-    // Process* p = NULL;  // TODO: uncomment when you implement this function
+    Process* p = NULL;  // TODO: uncomment when you implement this function
 
     while (1) {
         sem_wait(svars->cpuSems[threadNum]);
+
+        if(p == NULL){
+            
+
+            int shortestPosition = qShortest(&(svars->readyQ));
+            
+            pthread_mutex_lock(&(svars->readyQLock));
+            p = qRemove(&(svars->readyQ), shortestPosition);
+            
+            if (p == NULL) {
+                printf("No process to schedule\n");
+            } else {
+                printf("Scheduling PID %d\n", p->PID);
+            }
+
+            pthread_mutex_unlock(&(svars->readyQLock));
+        }
+
+        if (p != NULL) {
+            p->burstRemaining--;
+
+            if (p->burstRemaining == 0) {
+                pthread_mutex_lock(&(svars->finishedQLock));
+                qInsert(&(svars->finishedQ), p);
+                pthread_mutex_unlock(&(svars->finishedQLock));
+
+                p = NULL;
+            }
+        }
 
         sem_post(svars->mainSem);
     }
@@ -126,10 +155,38 @@ void* NPPcpu(void* param) {
     int threadNum = ((CpuParams*) param)->threadNumber;
     SharedVars* svars = ((CpuParams*) param)->svars;
 
-    // Process* p = NULL;  // TODO: uncomment when you implement this function
+    Process* p = NULL;  // TODO: uncomment when you implement this function
 
     while (1) {
         sem_wait(svars->cpuSems[threadNum]);
+
+        if(p == NULL){
+            
+            pthread_mutex_lock(&(svars->readyQLock));
+            int priorityPosition = qPriority(&(svars->readyQ));
+            
+            p = qRemove(&(svars->readyQ), priorityPosition);
+
+            if (p == NULL) {
+                printf("No process to schedule\n");
+            } else {
+                printf("Scheduling PID %d\n", p->PID);
+            }
+
+            pthread_mutex_unlock(&(svars->readyQLock));
+        }
+
+        if (p != NULL) {
+            p->burstRemaining--;
+
+            if (p->burstRemaining == 0) {
+                pthread_mutex_lock(&(svars->finishedQLock));
+                qInsert(&(svars->finishedQ), p);
+                pthread_mutex_unlock(&(svars->finishedQLock));
+
+                p = NULL;
+            }
+        }
 
         sem_post(svars->mainSem);
     }
