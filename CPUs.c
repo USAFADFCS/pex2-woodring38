@@ -116,9 +116,10 @@ void* SJFcpu(void* param) {
         if(p == NULL){
             
 
-            int shortestPosition = qShortest(&(svars->readyQ));
+            
             
             pthread_mutex_lock(&(svars->readyQLock));
+            int shortestPosition = qShortest(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), shortestPosition);
             
             if (p == NULL) {
@@ -170,23 +171,9 @@ void* NPPcpu(void* param) {
 
             if (p == NULL) {
                 printf("No process to schedule\n");
-            } else {
-              if(p == NULL){
-            
-
-            int shortestPosition = qShortest(&(svars->readyQ));
-            
-            pthread_mutex_lock(&(svars->readyQLock));
-            p = qRemove(&(svars->readyQ), shortestPosition);
-            
-            if (p == NULL) {
-                printf("No process to schedule\n");
-            } else {
+            } 
+            else {
                 printf("Scheduling PID %d\n", p->PID);
-            }
-
-            pthread_mutex_unlock(&(svars->readyQLock));
-        }  printf("Scheduling PID %d\n", p->PID);
             }
 
             pthread_mutex_unlock(&(svars->readyQLock));
@@ -313,16 +300,16 @@ void* SRTFcpu(void* param) {
         // main() posts cpuSems[threadNum] once per tick.  We block here
         // until that post arrives, keeping this CPU in lockstep with the clock.
         sem_wait(svars->cpuSems[threadNum]);
-
+        
+        pthread_mutex_lock(&(svars->readyQLock));
         if(p != NULL && p->burstRemaining > qShortestBR(&(svars->readyQ))){
-            pthread_mutex_lock(&(svars->readyQLock));
+            
             p->requeued = true;
             qInsert(&(svars->readyQ), p);
-            pthread_mutex_unlock(&(svars->readyQLock));
-
             p = NULL;
 
         }
+        pthread_mutex_unlock(&(svars->readyQLock));
 
         // ── Selection (only when idle) ───────────────────────────────────
         // FIFO is non-preemptive: once a process is running (p != NULL) we
@@ -330,9 +317,10 @@ void* SRTFcpu(void* param) {
         // has nothing to run.
         if(p == NULL){
             
-            int shortestPosition = qShortest(&(svars->readyQ));
+            
             
             pthread_mutex_lock(&(svars->readyQLock));
+            int shortestPosition = qShortest(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), shortestPosition);
             
             if (p == NULL) {
@@ -390,15 +378,17 @@ void* PPcpu(void* param) {
         // main() posts cpuSems[threadNum] once per tick.  We block here
         // until that post arrives, keeping this CPU in lockstep with the clock.
         sem_wait(svars->cpuSems[threadNum]);
+
+        pthread_mutex_lock(&(svars->readyQLock));
+
         if(p != NULL && p->priority > qGetPriority(&(svars->readyQ))){
-            pthread_mutex_lock(&(svars->readyQLock));
+            
             p->requeued = true;
             qInsert(&(svars->readyQ), p);
-            pthread_mutex_unlock(&(svars->readyQLock));
-
             p = NULL;
 
         }
+        pthread_mutex_unlock(&(svars->readyQLock));
 
         // ── Selection (only when idle) ───────────────────────────────────
         // FIFO is non-preemptive: once a process is running (p != NULL) we
@@ -406,9 +396,10 @@ void* PPcpu(void* param) {
         // has nothing to run.
         if(p == NULL){
             
-            int priorityPosition = qPriority(&(svars->readyQ));
+            
             
             pthread_mutex_lock(&(svars->readyQLock));
+            int priorityPosition = qPriority(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), priorityPosition);
             
             if (p == NULL) {
