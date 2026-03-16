@@ -114,10 +114,7 @@ void* SJFcpu(void* param) {
         sem_wait(svars->cpuSems[threadNum]);
 
         if(p == NULL){
-            
-
-            
-            
+        
             pthread_mutex_lock(&(svars->readyQLock));
             int shortestPosition = qShortest(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), shortestPosition);
@@ -272,8 +269,6 @@ void* RRcpu(void* param) {
             }
         }
 
-        
-
         // ── Sync point 2: signal main that this CPU is done ─────────────
         // main() waits on mainSem once per CPU per tick.  Posting here
         // tells main this CPU has finished its work for the current timestep.
@@ -317,8 +312,6 @@ void* SRTFcpu(void* param) {
         // has nothing to run.
         if(p == NULL){
             
-            
-            
             pthread_mutex_lock(&(svars->readyQLock));
             int shortestPosition = qShortest(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), shortestPosition);
@@ -349,8 +342,6 @@ void* SRTFcpu(void* param) {
                 p = NULL;
             }
         }
-
-        
 
         // ── Sync point 2: signal main that this CPU is done ─────────────
         // main() waits on mainSem once per CPU per tick.  Posting here
@@ -396,8 +387,6 @@ void* PPcpu(void* param) {
         // has nothing to run.
         if(p == NULL){
             
-            
-            
             pthread_mutex_lock(&(svars->readyQLock));
             int priorityPosition = qPriority(&(svars->readyQ));
             p = qRemove(&(svars->readyQ), priorityPosition);
@@ -428,8 +417,6 @@ void* PPcpu(void* param) {
                 p = NULL;
             }
         }
-
-        
 
         // ── Sync point 2: signal main that this CPU is done ─────────────
         // main() waits on mainSem once per CPU per tick.  Posting here
